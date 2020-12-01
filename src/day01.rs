@@ -18,7 +18,7 @@ impl Day01 {
     fn product_of_tuple_with_correct_sum(self: &Self, input: &mut dyn io::Read, n: usize, sum: i32) -> BoxResult<i32> {
         self.numbers(input).combinations(n)
             .find_map(|v| if v.iter().sum::<i32>() == sum { Some(v.iter().product::<i32>()) } else { None })
-            .ok_or(AocError::into())
+            .ok_or(Box::new(AocError))
     }
 
     fn part1_impl(self: &Self, input: &mut dyn io::Read) -> BoxResult<i32> {
@@ -65,7 +65,7 @@ mod tests {
     use super::*;
 
     fn test1(s: &str, f: i32) {
-        assert_eq!(Day01 {}.part1_impl(&mut s.as_bytes()).unwrap(), f);
+        assert_eq!(Day01 {}.part1_impl(&mut s.as_bytes()).ok(), Some(f));
     }
 
     #[test]
@@ -79,7 +79,7 @@ mod tests {
     }
 
     fn test2(s: &str, f: i32) {
-        assert_eq!(Day01 {}.part2_impl(&mut s.as_bytes()).unwrap(), f);
+        assert_eq!(Day01 {}.part2_impl(&mut s.as_bytes()).ok(), Some(f));
     }
 
     #[test]
