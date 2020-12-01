@@ -2,6 +2,7 @@ pub use itertools::Itertools;
 pub use std::error;
 use std::fmt;
 pub use std::io;
+use std::io::BufRead;
 
 pub type BoxResult<T> = Result<T, Box<dyn error::Error>>;
 
@@ -20,4 +21,8 @@ pub trait Day {
     fn tag(&self) -> &str;
     fn part1(&self, _input: &dyn Fn() -> Box<dyn io::Read>) {}
     fn part2(&self, _input: &dyn Fn() -> Box<dyn io::Read>) {}
+
+    fn numbers(&self, input: &mut dyn io::Read) -> Box<dyn Iterator<Item=i32>> {
+        Box::new(io::BufReader::new(input).lines().map(|s| s.unwrap().parse::<i32>().unwrap()))
+    }
 }

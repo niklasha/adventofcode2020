@@ -1,4 +1,3 @@
-use std::io::BufRead;
 use crate::day::*;
 
 pub struct Day01 {}
@@ -17,10 +16,9 @@ impl Day for Day01 {
 
 impl Day01 {
     fn product_of_tuple_with_correct_sum(self: &Self, input: &mut dyn io::Read, n: usize, sum: i32) -> BoxResult<i32> {
-        let reader = io::BufReader::new(input);
-        Ok(reader.lines().map(|s| s.unwrap().parse::<i32>().unwrap()).combinations(n)
+        self.numbers(input).combinations(n)
             .find_map(|v| if v.iter().sum::<i32>() == sum { Some(v.iter().product::<i32>()) } else { None })
-            .unwrap())
+            .ok_or(AocError::into())
     }
 
     fn part1_impl(self: &Self, input: &mut dyn io::Read) -> BoxResult<i32> {
