@@ -22,8 +22,9 @@ pub trait Day {
     fn part1(&self, _input: &dyn Fn() -> Box<dyn io::Read>) {}
     fn part2(&self, _input: &dyn Fn() -> Box<dyn io::Read>) {}
 
-    // XXX Some Result type would be better here.
-    fn numbers<'a>(&self, input: &'a mut dyn io::Read) -> Box<dyn Iterator<Item=i32> + 'a> {
-        Box::new(io::BufReader::new(input).lines().map(|s| s.unwrap().parse::<i32>().unwrap()))
+    fn numbers<'a>(&self, input: &'a mut dyn io::Read) -> Box<dyn Iterator<Item=BoxResult<i32>> + 'a> {
+        let lines = io::BufReader::new(input).lines();
+        Box::new(lines.map(|r| r.map_err(|e| e.into())
+            .and_then(|s| s.parse::<i32>().map_err(|e| e.into()))))
     }
 }
