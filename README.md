@@ -18,5 +18,11 @@ The tests (the examples given in the days' descriptions) can be run with:
 cargo test
 ```
 
+When I solved a puzzle in a not so idiomatic or nice way, and later went back to refine the code, I have chosen to retain the naive solution as dead code with method names suffixed with  "_naive".
+
+```
 My results were:
+      -------Part 1--------   -------Part 2--------
+Day       Time  Rank  Score       Time  Rank  Score
+  1   00:13:29  2444      0   00:17:24  2444      0
 ```
