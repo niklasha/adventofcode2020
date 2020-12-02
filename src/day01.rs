@@ -16,7 +16,7 @@ impl Day for Day01 {
 
 impl Day01 {
     fn product_of_tuple_with_correct_sum(self: &Self, input: &mut dyn io::Read, n: usize, sum: i32) -> BoxResult<i32> {
-        self.numbers(input).map(Result::unwrap).combinations(n)
+        Utils::numbers(input).map(Result::unwrap).combinations(n)
             .find_map(|v| if v.iter().sum::<i32>() == sum { Some(v.iter().product::<i32>()) } else { None })
             .ok_or(Box::new(AocError))
     }

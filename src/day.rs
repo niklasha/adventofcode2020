@@ -21,10 +21,14 @@ pub trait Day {
     fn tag(&self) -> &str;
     fn part1(&self, _input: &dyn Fn() -> Box<dyn io::Read>) {}
     fn part2(&self, _input: &dyn Fn() -> Box<dyn io::Read>) {}
+}
 
-    fn numbers<'a>(&self, input: &'a mut dyn io::Read) -> Box<dyn Iterator<Item=BoxResult<i32>> + 'a> {
+pub struct Utils;
+
+impl Utils {
+    pub fn numbers<'a>(input: &'a mut dyn io::Read) -> impl Iterator<Item=BoxResult<i32>> + 'a {
         let lines = io::BufReader::new(input).lines();
-        Box::new(lines.map(|r| r.map_err(|e| e.into())
-            .and_then(|s| s.parse::<i32>().map_err(|e| e.into()))))
+        lines.map(|r| r.map_err(|e| e.into())
+            .and_then(|s| s.parse::<i32>().map_err(|e| e.into())))
     }
 }
