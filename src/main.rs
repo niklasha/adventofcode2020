@@ -1,13 +1,13 @@
 //#[macro_use]
 extern crate closure;
-//#[macro_use]
+#[macro_use]
 extern crate lazy_static;
 //#[macro_use]
 extern crate simple_error;
 
 mod day;
 mod day01;
-//mod day02;
+mod day02;
 //mod day03;
 //mod day04;
 //mod day05;
@@ -40,7 +40,7 @@ fn main() {
     let args = env::args().collect::<Vec<_>>();
     let prefix = &args[1];
     let days: Vec<Box<dyn Day>> = vec![
-        Box::new(day01::Day01 {}) //, Box::new(day02::Day02 {}),
+        Box::new(day01::Day01 {}), Box::new(day02::Day02 {}),
 //        Box::new(day03::Day03 {}), Box::new(day04::Day04 {}),
 //        Box::new(day05::Day05 {}), Box::new(day06::Day06 {}),
 //        Box::new(day07::Day07 {}), Box::new(day08::Day08 {}),
