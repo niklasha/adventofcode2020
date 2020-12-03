@@ -18,12 +18,12 @@ impl Day03 {
     fn tree_count(self: &Self, forest: &Vec<Vec<u8>>, slope: (usize, usize)) -> BoxResult<usize> {
         Ok((0..forest.len()).step_by(slope.1).fold((0, 0), |(x, c), y| {
             let row = &forest[y];
-            (x + slope.0, c + if row[x % row.len()] == '#' as u8 { 1 } else { 0 })
+            (x + slope.0, c + if row[x % row.len()] == b'#' { 1 } else { 0 })
         }).1)
     }
 
     fn read_forest(self: &Self, input: &mut dyn io::Read) -> Vec<Vec<u8>> {
-        io::BufReader::new(input).split('\n' as u8).map(Result::unwrap).collect::<Vec<_>>()
+        io::BufReader::new(input).split(b'\n').map(Result::unwrap).collect::<Vec<_>>()
     }
 
     fn part1_impl(self: &Self, input: &mut dyn io::Read) -> BoxResult<usize> {
