@@ -15,7 +15,29 @@ impl Day for Day03 {
 }
 
 impl Day03 {
-    fn tree_count(self: &Self, lines: &Vec<String>, slope: (usize, usize)) -> BoxResult<usize> {
+    fn tree_count(self: &Self, forest: &Vec<Vec<u8>>, slope: (usize, usize)) -> BoxResult<usize> {
+        Ok((0..forest.len()).step_by(slope.1).fold((0, 0), |(x, c), y| {
+            let row = &forest[y];
+            (x + slope.0, c + if row[x % row.len()] == '#' as u8 { 1 } else { 0 })
+        }).1)
+    }
+
+    fn read_forest(self: &Self, input: &mut dyn io::Read) -> Vec<Vec<u8>> {
+        io::BufReader::new(input).split('\n' as u8).map(Result::unwrap).collect::<Vec<_>>()
+    }
+
+    fn part1_impl(self: &Self, input: &mut dyn io::Read) -> BoxResult<usize> {
+        self.tree_count(&self.read_forest(input), (3, 1))
+    }
+
+    fn part2_impl(self: &Self, input: &mut dyn io::Read) -> BoxResult<usize> {
+        let forest = self.read_forest(input);
+        Ok(vec![(1, 1), (3, 1), (5, 1), (7, 1), (1, 2)].iter().map(|&s|
+            self.tree_count(&forest, s).unwrap()).product())
+    }
+
+    #[allow(dead_code)]
+    fn tree_count_naive(self: &Self, lines: &Vec<String>, slope: (usize, usize)) -> BoxResult<usize> {
         Ok(lines.iter().fold((0, 0, 0), |(c, x, y), l| {
             let s = l.chars().collect::<Vec<_>>();
             let x = x % s.len();
@@ -23,15 +45,17 @@ impl Day03 {
         }).0)
     }
 
-    fn part1_impl(self: &Self, input: &mut dyn io::Read) -> BoxResult<usize> {
+    #[allow(dead_code)]
+    fn part1_impl_naive(self: &Self, input: &mut dyn io::Read) -> BoxResult<usize> {
         let lines = io::BufReader::new(input).lines().map(|rs| rs.unwrap()).collect::<Vec<_>>();
-        self.tree_count(&lines, (3, 1))
+        self.tree_count_naive(&lines, (3, 1))
     }
 
-    fn part2_impl(self: &Self, input: &mut dyn io::Read) -> BoxResult<usize> {
+    #[allow(dead_code)]
+    fn part2_impl_naive(self: &Self, input: &mut dyn io::Read) -> BoxResult<usize> {
         let lines = io::BufReader::new(input).lines().map(|rs| rs.unwrap()).collect::<Vec<_>>();
         Ok(vec![(1, 1), (3, 1), (5, 1), (7, 1), (1, 2)].iter().map(|&s|
-            self.tree_count(&lines, s).unwrap()).product())
+            self.tree_count_naive(&lines, s).unwrap()).product())
     }
 
 }
