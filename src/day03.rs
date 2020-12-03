@@ -23,11 +23,11 @@ impl Day03 {
     }
 
     fn part1_impl(self: &Self, input: &mut dyn io::Read) -> BoxResult<usize> {
-        self.tree_count(&Utils::byte_matrix(input), (3, 1))
+        self.tree_count(&Utils::byte_matrix(input).unwrap(), (3, 1))
     }
 
     fn part2_impl(self: &Self, input: &mut dyn io::Read) -> BoxResult<usize> {
-        let forest = Utils::byte_matrix(input);
+        let forest = Utils::byte_matrix(input).unwrap();
         Ok(vec![(1, 1), (3, 1), (5, 1), (7, 1), (1, 2)].iter().map(|&s|
             self.tree_count(&forest, s).unwrap()).product())
     }

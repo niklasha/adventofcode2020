@@ -32,7 +32,7 @@ impl Utils {
             .and_then(|s| s.parse::<i32>().map_err(|e| e.into())))
     }
 
-    pub fn byte_matrix(input: &mut dyn io::Read) -> Vec<Vec<u8>> {
-        io::BufReader::new(input).split(b'\n').map(Result::unwrap).collect::<Vec<_>>()
+    pub fn byte_matrix(input: &mut dyn io::Read) -> BoxResult<Vec<Vec<u8>>> {
+        io::BufReader::new(input).split(b'\n').map(|rv| rv.map_err(|e| e.into())).collect()
     }
 }
