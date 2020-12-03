@@ -22,16 +22,12 @@ impl Day03 {
         }).1)
     }
 
-    fn read_forest(self: &Self, input: &mut dyn io::Read) -> Vec<Vec<u8>> {
-        io::BufReader::new(input).split(b'\n').map(Result::unwrap).collect::<Vec<_>>()
-    }
-
     fn part1_impl(self: &Self, input: &mut dyn io::Read) -> BoxResult<usize> {
-        self.tree_count(&self.read_forest(input), (3, 1))
+        self.tree_count(&Utils::byte_matrix(input), (3, 1))
     }
 
     fn part2_impl(self: &Self, input: &mut dyn io::Read) -> BoxResult<usize> {
-        let forest = self.read_forest(input);
+        let forest = Utils::byte_matrix(input);
         Ok(vec![(1, 1), (3, 1), (5, 1), (7, 1), (1, 2)].iter().map(|&s|
             self.tree_count(&forest, s).unwrap()).product())
     }

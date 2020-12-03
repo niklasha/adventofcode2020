@@ -31,4 +31,8 @@ impl Utils {
         lines.map(|rs| rs.map_err(|e| e.into())
             .and_then(|s| s.parse::<i32>().map_err(|e| e.into())))
     }
+
+    pub fn byte_matrix(input: &mut dyn io::Read) -> Vec<Vec<u8>> {
+        io::BufReader::new(input).split(b'\n').map(Result::unwrap).collect::<Vec<_>>()
+    }
 }
