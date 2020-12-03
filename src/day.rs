@@ -28,7 +28,7 @@ pub struct Utils;
 impl Utils {
     pub fn numbers<'a>(input: &'a mut dyn io::Read) -> impl Iterator<Item=BoxResult<i32>> + 'a {
         let lines = io::BufReader::new(input).lines();
-        lines.map(|r| r.map_err(|e| e.into())
+        lines.map(|rs| rs.map_err(|e| e.into())
             .and_then(|s| s.parse::<i32>().map_err(|e| e.into())))
     }
 }
