@@ -18,8 +18,8 @@ impl Day for Day04 {
 
 impl Day04 {
     fn part1_validate(p: &str) -> bool {
-        p.split(" ").map(|f| f.split(":").next()).collect::<BoxResult<Vec<_>>>()
-            .map(|fs| ["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"].iter().all(|&f| fs.contains(&f))) == Ok(true)
+        let fs = p.split(" ").map(|f| f.split(":").next().unwrap()).collect::<Vec<_>>();
+        ["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"].iter().all(|&f| fs.contains(&f))
     }
 
     #[allow(dead_code)]
