@@ -18,9 +18,8 @@ impl Day for Day04 {
 
 impl Day04 {
     fn part1_validate(p: &str) -> bool {
-        let req = ["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"];
-        // XXX Will accept and count duplicate fields
-        p.split(" ").fold(0, |c, f| c + if req.contains(&f.split(":").next().unwrap()) { 1 } else { 0 }) == req.len()
+        let fs = p.split(" ").map(|f| f.split(":").next().unwrap()).collect::<Vec<_>>();
+        ["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"].iter().all(|&f| fs.contains(&f))
     }
 
     fn part2_validate(p: &str) -> bool {
@@ -49,8 +48,18 @@ impl Day04 {
         where
             F: Fn(&str) -> bool,
     {
+        let passports = io::BufReader::new(input).lines().map(Result::unwrap)
+            .coalesce(|x, y| if y.is_empty() { Err((x, y)) } else { Ok(if x.is_empty() { y } else { format!("{} {}", x, y) }) });
+        Ok(passports.filter(|s| validate(s)).count())
+    }
+
+    #[allow(dead_code)]
+    fn naive_process<F>(self: &Self, input: &mut dyn io::Read, validate: F) -> BoxResult<usize>
+        where
+            F: Fn(&str) -> bool,
+    {
         let lines = io::BufReader::new(input).lines();
-        Ok(lines.chain(iter::once(Ok(String::new()))).map(|rs| rs/*.map_err(|e| e.into())*/)
+        Ok(lines.chain(iter::once(Ok(String::new()))).map(|rs| rs)
             .scan((0, String::new()), |st, rs| {
                 let s = rs.unwrap();
                 let (c, p) = st;
