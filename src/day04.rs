@@ -18,14 +18,13 @@ impl Day for Day04 {
 
 impl Day04 {
     fn part1_validate(p: &str) -> bool {
-        let req = vec!["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"];
+        let req = ["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"];
         // XXX Will accept and count duplicate fields
-        p.split(" ").fold(0, |c, f| c + if req.contains(&f.split(":").next().unwrap()) { 1 } else { 0 }) == 7
+        p.split(" ").fold(0, |c, f| c + if req.contains(&f.split(":").next().unwrap()) { 1 } else { 0 }) == req.len()
     }
 
     fn part2_validate(p: &str) -> bool {
-        let p = p.trim();
-        let n = p.split(" ").fold(0, |c, f| {
+        p.split(" ").fold(0, |c, f| {
             let mut fs = f.split(":");
             let k = fs.next().unwrap();
             let v = fs.next().unwrap();
@@ -39,15 +38,11 @@ impl Day04 {
                         cap[1].parse::<i32>().map(|x| if &cap[2] == "cm" { x >= 150 && x <= 193 } else { x >= 59 && x <= 76 }).ok()
                     })),
                 "hcl" => Regex::new("^#[0-9a-f]{6}$").map(|re| re.is_match(v)).ok(),
-                "ecl" => {
-                    let ecls = vec!["amb", "blu", "brn", "gry", "grn", "hzl", "oth"];
-                    Some(ecls.contains(&v))
-                },
+                "ecl" => Some(["amb", "blu", "brn", "gry", "grn", "hzl", "oth"].contains(&v)),
                 "pid" =>  Regex::new("^\\d{9}$").map(|re| re.is_match(v)).ok(),
                 _ => None
             } == Some(true) { 1 } else { 0 })
-        });
-        n == 7
+        }) == 7
     }
 
     fn process<F>(self: &Self, input: &mut dyn io::Read, validate: F) -> BoxResult<usize>
@@ -65,7 +60,7 @@ impl Day04 {
                     *p = String::new();
                     Some(Some(v))
                 } else {
-                    p.push_str(" ");
+                    if p != "" { p.push_str(" ") };
                     p.push_str(&s);
                     Some(None)
                 }
