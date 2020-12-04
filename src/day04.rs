@@ -18,8 +18,15 @@ impl Day for Day04 {
 
 impl Day04 {
     fn part1_validate(p: &str) -> bool {
-        let fs = p.split(" ").map(|f| f.split(":").next().unwrap()).collect::<Vec<_>>();
-        ["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"].iter().all(|&f| fs.contains(&f))
+        p.split(" ").map(|f| f.split(":").next()).collect::<BoxResult<Vec<_>>>()
+            .map(|fs| ["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"].iter().all(|&f| fs.contains(&f))) == Ok(true)
+    }
+
+    #[allow(dead_code)]
+    fn part1_validate_naive(p: &str) -> bool {
+        let req = ["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"];
+        // XXX Will accept and count duplicate fields
+        p.split(" ").fold(0, |c, f| c + if req.contains(&f.split(":").next().unwrap()) { 1 } else { 0 }) == req.len()
     }
 
     fn part2_validate(p: &str) -> bool {
