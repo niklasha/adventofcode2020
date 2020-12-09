@@ -26,10 +26,10 @@ pub trait Day {
 pub struct Utils;
 
 impl Utils {
-    pub fn numbers<'a>(input: &'a mut dyn io::Read) -> impl Iterator<Item=BoxResult<i32>> + 'a {
+    pub fn numbers<'a>(input: &'a mut dyn io::Read) -> impl Iterator<Item=BoxResult<i64>> + 'a {
         let lines = io::BufReader::new(input).lines();
         lines.map(|rs| rs.map_err(|e| e.into())
-            .and_then(|s| s.parse::<i32>().map_err(|e| e.into())))
+            .and_then(|s| s.parse::<i64>().map_err(|e| e.into())))
     }
 
     pub fn byte_matrix(input: &mut dyn io::Read) -> BoxResult<Vec<Vec<u8>>> {

@@ -15,24 +15,24 @@ impl Day for Day01 {
 }
 
 impl Day01 {
-    fn product_of_tuple_with_correct_sum(self: &Self, input: &mut dyn io::Read, n: usize, sum: i32) -> BoxResult<i32> {
+    fn product_of_tuple_with_correct_sum(self: &Self, input: &mut dyn io::Read, n: usize, sum: i64) -> BoxResult<i64> {
         Utils::numbers(input).map(Result::unwrap).combinations(n)
-            .find_map(|v| if v.iter().sum::<i32>() == sum { Some(v.iter().product::<i32>()) } else { None })
+            .find_map(|v| if v.iter().sum::<i64>() == sum { Some(v.iter().product::<i64>()) } else { None })
             .ok_or(Box::new(AocError))
     }
 
-    fn part1_impl(self: &Self, input: &mut dyn io::Read) -> BoxResult<i32> {
+    fn part1_impl(self: &Self, input: &mut dyn io::Read) -> BoxResult<i64> {
         self.product_of_tuple_with_correct_sum(input, 2, 2020)
     }
 
-    fn part2_impl(self: &Self, input: &mut dyn io::Read) -> BoxResult<i32> {
+    fn part2_impl(self: &Self, input: &mut dyn io::Read) -> BoxResult<i64> {
         self.product_of_tuple_with_correct_sum(input, 3, 2020)
     }
 
     #[allow(dead_code)]
-    fn part1_impl_naive(self: &Self, input: &mut dyn io::Read) -> BoxResult<i32> {
+    fn part1_impl_naive(self: &Self, input: &mut dyn io::Read) -> BoxResult<i64> {
         let reader = io::BufReader::new(input);
-        let v = reader.lines().map(|s| s.unwrap().parse::<i32>().unwrap()).collect::<Vec<_>>();
+        let v = reader.lines().map(|s| s.unwrap().parse::<i64>().unwrap()).collect::<Vec<_>>();
         for (i, el1) in v.iter().enumerate() {
             for el2 in v[i + 1..].iter() {
                 if el1 + el2 == 2020 {
@@ -44,9 +44,9 @@ impl Day01 {
     }
 
     #[allow(dead_code)]
-    fn part2_impl_naive(self: &Self, input: &mut dyn io::Read) -> BoxResult<i32> {
+    fn part2_impl_naive(self: &Self, input: &mut dyn io::Read) -> BoxResult<i64> {
         let reader = io::BufReader::new(input);
-        let v = reader.lines().map(|s| s.unwrap().parse::<i32>().unwrap()).collect::<Vec<_>>();
+        let v = reader.lines().map(|s| s.unwrap().parse::<i64>().unwrap()).collect::<Vec<_>>();
         for (i, el1) in v.iter().enumerate() {
             for (j, el2) in v[i + 1..].iter().enumerate() {
                 for el3 in v[i + j + 1..].iter() {
@@ -64,7 +64,7 @@ impl Day01 {
 mod tests {
     use super::*;
 
-    fn test1(s: &str, f: i32) {
+    fn test1(s: &str, f: i64) {
         assert_eq!(Day01 {}.part1_impl(&mut s.as_bytes()).ok(), Some(f));
     }
 
@@ -78,7 +78,7 @@ mod tests {
 1456", 514579);
     }
 
-    fn test2(s: &str, f: i32) {
+    fn test2(s: &str, f: i64) {
         assert_eq!(Day01 {}.part2_impl(&mut s.as_bytes()).ok(), Some(f));
     }
 
