@@ -5,6 +5,7 @@ extern crate lazy_static;
 //#[macro_use]
 extern crate simple_error;
 
+mod cpu;
 mod day;
 mod day01;
 mod day02;

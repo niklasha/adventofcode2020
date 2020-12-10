@@ -1,4 +1,5 @@
 use regex::Regex;
+use crate::cpu::*;
 use crate::day::*;
 
 pub struct Day08 {}
@@ -7,7 +8,7 @@ impl Day for Day08 {
     fn tag(&self) -> &str { "08" }
 
     fn part1(&self, input: &dyn Fn() -> Box<dyn io::Read>) {
-        println!("{:?}", self.part1_impl(&mut *input(), 5));
+        println!("{:?}", self.part1_impl(&mut *input(), 0));
     }
 
     fn part2(&self, input: &dyn Fn() -> Box<dyn io::Read>) {
@@ -16,7 +17,8 @@ impl Day for Day08 {
 }
 
 impl Day08 {
-    fn load<'a>(self: &Self, input: &'a mut dyn io::Read) -> Vec<(String, i64)> {
+    #[allow(dead_code)]
+    fn load_naive<'a>(self: &Self, input: &'a mut dyn io::Read) -> Vec<(String, i64)> {
         let lines = io::BufReader::new(input).lines();
         lazy_static! {
             static ref RE: Regex = Regex::new("^(acc|jmp|nop) ([-+]\\d+)$").unwrap();
@@ -28,8 +30,9 @@ impl Day08 {
         }).collect::<Vec<_>>()
     }
 
-    fn process<'a>(self: &Self, p: &Vec<(String, i64)>, _i: i64) -> BoxResult<(bool, i64)> {
-        let mut a = 0;
+    #[allow(dead_code)]
+    fn process_naive<'a>(self: &Self, p: &Vec<(String, i64)>, i: i64) -> BoxResult<(bool, i64)> {
+        let mut a = i;
         let mut ip = 0;
         let mut v = p.iter().map(|_| false).collect::<Vec<_>>();
         while ip < v.len() && !v[ip] {
@@ -47,16 +50,35 @@ impl Day08 {
     }
 
     fn part1_impl(self: &Self, input: &mut dyn io::Read, i: i64) -> BoxResult<i64> {
-        let p = self.load(input);
-        self.process(&p, i).map(|(_, x)| x)
+        Cpu::from(input)?.debug(true).run(i).map(|(_, x)| x)
+    }
+
+    #[allow(dead_code)]
+    fn part1_impl_naive(self: &Self, input: &mut dyn io::Read, i: i64) -> BoxResult<i64> {
+        let p = self.load_naive(input);
+        self.process_naive(&p, i).map(|(_, x)| x)
     }
 
     fn part2_impl(self: &Self, input: &mut dyn io::Read, i: i64) -> BoxResult<i64> {
-        let p0 = self.load(input);
+        let cpu0 = Cpu::from(input)?.debug(true);
+        let mut runs = cpu0.instruction_index(|i| match i { Instruction::Jmp(_) | Instruction::Nop(_) => true, _ => false }).map(|ip| {
+            let cpu = cpu0.clone();
+            cpu.patch(ip, |i| match i {
+                Instruction::Jmp(x) => Instruction::Nop(x),
+                Instruction::Nop(x) => Instruction::Jmp(x),
+                x => x // Will never happen
+            }).run(i)
+        });
+        runs.find(|r| r.as_ref().ok().map(|(b, _)| b) == Some(&false)).unwrap().map(|(_, r)| r)
+    }
+
+    #[allow(dead_code)]
+    fn part2_impl_naive(self: &Self, input: &mut dyn io::Read, i: i64) -> BoxResult<i64> {
+        let p0 = self.load_naive(input);
         p0.iter().enumerate().filter(|(_, (o, _))| o == "nop" || o == "jmp").map(|(i, _)| i).map(|ip| {
             let mut p = p0.clone();
             p[ip] = (if p[ip].0 == "nop" { "jmp" } else { "nop" }.to_string(), p[ip].1);
-            let r = self.process(&p, i);
+            let r = self.process_naive(&p, i);
             r
         }).find(|r| r.as_ref().ok().map(|(b, _)| b) == Some(&false)).unwrap().map(|(_, r)| r)
     }
