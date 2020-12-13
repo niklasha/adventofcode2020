@@ -20,7 +20,7 @@ impl Day13 {
         let mut lines = io::BufReader::new(input).lines();
         let t0 = lines.next().unwrap()?.parse::<usize>().unwrap();
         let ids = lines.next().unwrap()?;
-        let mut ids = ids.split(",").filter(|&id| id != "x").map(|id| id.parse::<usize>().unwrap());
+        let ids = ids.split(",").filter(|&id| id != "x").map(|id| id.parse::<usize>().unwrap());
         let (id, w) = ids.map(|id| (id, id - t0 % id)).min_by_key(|(_, w)| *w).unwrap();
         Ok(id * w)
     }
