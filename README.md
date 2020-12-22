@@ -24,6 +24,8 @@ When I solved a puzzle in a not so idiomatic or nice way, and later went back to
 My results were:
       --------Part 1--------   --------Part 2--------
 Day       Time   Rank  Score       Time   Rank  Score
+ 22   00:27:05   3103      0   01:23:31   2410      0
+ 20   02:03:39   2619      0          -      -      -
  19   01:31:01   2625      0   03:41:52   2814      0
  18   00:58:30   3141      0   01:16:24   2489      0
  17   01:26:59   3617      0   01:39:19   3405      0

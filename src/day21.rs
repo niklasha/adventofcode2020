@@ -1,0 +1,121 @@
+use crate::day::*;
+use regex::Regex;
+use std::collections::{HashMap, HashSet};
+
+pub struct Day21 {}
+
+impl Day for Day21 {
+    fn tag(&self) -> &str { "21" }
+
+    fn part1(&self, input: &dyn Fn() -> Box<dyn io::Read>) {
+        println!("{:?}", self.part1_impl(&mut *input()));
+    }
+
+    fn part2(&self, input: &dyn Fn() -> Box<dyn io::Read>) {
+        println!("{:?}", self.part2_impl(&mut *input()));
+    }
+}
+
+type Facts = HashMap<String, (Option<String>, HashSet<String>)>;
+
+impl Day21 {
+    fn part1_impl(self: &Self, input: &mut dyn io::Read) -> BoxResult<usize> {
+        let lines = &mut io::BufReader::new(input).lines();
+        lazy_static! {
+            static ref RE: Regex = Regex::new("^((.+) )*(.*) \\(contains ((.+), )*(.*)\\)$").unwrap();
+        }
+        let mut foods = lines.map(|l| {
+            let l = l.unwrap();
+            let cap = RE.captures(&l).unwrap();
+            let ingredients = format!("{}{}", cap[1].to_string(), cap[3].to_string());
+            let ingredients = ingredients.split(" ").map(|s| s.to_string()).collect::<HashSet<_>>();
+            let allergens = format!("{}{}", cap.get(4).map_or("", |m| m.as_str()).to_string(), cap[6].to_string());
+            let allergens = allergens.split(", ").map(|s| s.to_string()).collect::<HashSet<_>>();
+            (ingredients, allergens)
+        }).collect_vec();
+        foods.sort_by_key(|(ingredients, _)| ingredients.len());
+        println!("{:?}", foods);
+
+        let mut i = 0;
+        let facts_base = foods.iter().fold(vec![HashMap::new()], |facts_base, (ingredients, allergens)| {
+            println!("{}", i); i += 1;
+            let isp = ingredients.iter().permutations(allergens.len());
+            let iasp = isp.map(|is|
+                is.iter().map(|s| s.to_string()).zip(allergens.iter().map(|s| s.to_string())).collect::<HashMap<_, _>>());
+            let new_facts_base = iasp.map(|ias| ingredients.iter().map(move |i| {
+                    let allergen = ias.get(i).map(|s| s.to_string());
+                    (i.to_string(), (allergen.clone(), allergens.iter().map(|s| s.to_string()).filter(|a| allergen != Some(a.to_string())).collect::<HashSet<_>>()))
+                }).collect::<HashMap<_, _>>()).collect_vec();
+
+            // Two facts sets are compatible if they do not contain ingredients which in one facts set contain one allergen and, in the other set, another,
+            // also allergens ruled out for one ingredient in one set, must of course not be a contained allergen for the same ingredient, in the other set.
+            // Another incompatibility case is that the same allergen may not be contained in more than one ingredient.
+            fn is_compatible(a: &Facts, b: &Facts) -> bool {
+                a.iter().all(|(id, (a_allergen, a_not_allergens))|
+                    b.get(id).map_or(true, |(b_allergen, b_not_allergens)|
+                        a_allergen == b_allergen ||
+                            (a_allergen.is_none() && !a_not_allergens.contains(b_allergen.as_ref().unwrap())) ||
+                            (b_allergen.is_none() && !b_not_allergens.contains(a_allergen.as_ref().unwrap())))) &&
+                    a.iter().filter(|&(_, (allergen, _))| allergen.is_some()).map(|(id, (allergen, _))| (allergen.clone().unwrap(), id)).chain(
+                        b.iter().filter(|&(_, (allergen, _))| allergen.is_some()).map(|(id, (allergen, _))| (allergen.clone().unwrap(), id)))
+                        .unique().into_group_map().values().filter(|&v| v.len() >= 2).count() == 0
+            }
+
+            fn merge(a: &Facts, b: &Facts) -> Facts {
+                let keys: HashSet<String> = a.keys().map(String::to_string).collect::<HashSet<_>>()
+                    .union(&b.keys().map(String::to_string).collect()).map(String::to_string).collect();
+                let rv = keys.iter().map(|k| (k.to_string(), {
+                    let a = a.get(k).map(|a| a.clone());
+                    let b = b.get(k).map(|b| b.clone());
+                    let b_clone = b.clone();
+                    let merged = a.map_or_else(|| b_clone.unwrap(), |a| {
+                        let (a_allergen, a_not_allergens) = a.clone();
+                        b.map_or(a, |(b_allergen, b_not_allergens)|
+                            (a_allergen.or(b_allergen), a_not_allergens.union(&b_not_allergens).map(String::to_string).collect()))
+                    });
+                    merged
+                })).collect();
+                rv
+            }
+
+            new_facts_base.iter().cartesian_product(facts_base.iter())
+                .filter(|&(new_facts, facts)| is_compatible(new_facts, facts))
+                .map(|(new_facts, facts)| merge(new_facts, facts)).collect_vec()
+        });
+        println!("{:?}", facts_base);
+        let harmless = facts_base[0].iter().filter(|(_, (allergen, _))| allergen.is_none()).map(|(id, _)| id).collect::<HashSet<_>>();
+        println!("{:?}", harmless);
+        Ok(foods.iter().map(|(ingredients, _)| ingredients.iter().filter(|&ingredient| harmless.contains(ingredient)).count()).sum())
+    }
+
+    fn part2_impl(self: &Self, input: &mut dyn io::Read) -> BoxResult<usize> {
+        let lines = &mut io::BufReader::new(input).lines();
+        Ok(0)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn test1(s: &str, f: usize) {
+        assert_eq!(Day21 {}.part1_impl(&mut s.as_bytes()).ok(), Some(f));
+    }
+
+    #[test]
+    fn part1() {
+        test1("mxmxvkd kfcds sqjhc nhms (contains dairy, fish)
+trh fvjkl sbzzf mxmxvkd (contains dairy)
+sqjhc fvjkl (contains soy)
+sqjhc mxmxvkd sbzzf (contains fish)", 5);
+    }
+
+    fn test2(s: &str, f: usize) {
+        assert_eq!(Day21 {}.part2_impl(&mut s.as_bytes()).ok(), Some(f));
+    }
+
+    #[test]
+    fn part2() {
+        test2("", 12);
+    }
+}
