@@ -16,7 +16,7 @@ impl Day25 {
         let card_pk = numbers.next().unwrap().unwrap();
         let door_pk = numbers.next().unwrap().unwrap();
         let mut v = 1;
-        let n = (1..20201227).find(|&n| {
+        let n = (1..20201227).find(|_| {
             v = (v * 7) % 20201227;
             v == card_pk || v == door_pk
         }).unwrap();

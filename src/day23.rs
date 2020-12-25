@@ -133,7 +133,7 @@ impl/*<T : num::Integer>*/ Table/*<T>*/ for ListTable/*<T>*/ {
 
     fn result(&self, n: usize) -> Vec</*T*/u32> {
         let mut p = self.cups.indices().find(|&i| self.cups[i] == 1).unwrap();
-        (0..n).map(|i| {
+        (0..n).map(|_| {
             p = self.cups.get_next_index(p).unwrap_or(self.cups.indices().next().unwrap());
             self.cups[p]
         }).collect_vec()
