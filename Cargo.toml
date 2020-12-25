@@ -8,8 +8,10 @@ edition = "2018"
 
 [dependencies]
 closure = "0.3.0"
+dlv-list = "0.2.2"
 itertools = "0.9.0"
 lazy_static = "1.4.0"
+num = "*"
 reduce = "0.1.3"
 regex = "1.4.2"
 simple-error = "0.2"
