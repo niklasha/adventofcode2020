@@ -24,6 +24,36 @@ impl Day21 {
         lazy_static! {
             static ref RE: Regex = Regex::new("^((.+) )*(.*) \\(contains ((.+), )*(.*)\\)$").unwrap();
         }
+        let foods = lines.map(|l| {
+            let l = l.unwrap();
+            let cap = RE.captures(&l).unwrap();
+            let ingredients = format!("{}{}", cap[1].to_string(), cap[3].to_string());
+            let ingredients = ingredients.split(" ").map(|s| s.to_string()).collect::<HashSet<_>>();
+            let allergens = format!("{}{}", cap.get(4).map_or("", |m| m.as_str()).to_string(), cap[6].to_string());
+            let allergens = allergens.split(", ").map(|s| s.to_string()).collect::<HashSet<_>>();
+            (ingredients, allergens)
+        }).collect_vec();
+        let all_ingredients = foods.iter().flat_map(|(ingredients, _)| ingredients).map(|s| s.to_string()).collect::<HashSet<_>>();
+        let all_allergens = foods.iter().flat_map(|(_, allergens)| allergens).map(|s| s.to_string()).collect::<HashSet<_>>();
+        let all_allergens = all_allergens.iter().map(|allergen| (allergen.to_string(), all_ingredients.clone())).collect::<HashMap<_, _>>();
+        let all_allergens = foods.iter().fold(all_allergens, |all_allergens, (ingredients, allergens)|
+            all_allergens.iter().map(|(allergen, possible_ingredients)|
+                (allergen.to_string(),
+                 if allergens.contains(allergen) {
+                     possible_ingredients.intersection(ingredients).map(|s| s.to_string()).collect::<HashSet<_>>()
+                 } else { possible_ingredients.clone() }))
+                .collect::<HashMap<_, _>>());
+        Ok(all_ingredients.iter().filter(|&ingredient| all_allergens.values().all(|ingredients| !ingredients.contains(ingredient)))
+            .map(|ingredient| foods.iter().filter(|&(ingredients, _)| ingredients.contains(ingredient)).count()).sum())
+    }
+
+    // This code is a solution, but it contains a combinatorial explosion, and likely won't terminate anytime soon.
+    #[allow(dead_code)]
+    fn naive_part1_impl(self: &Self, input: &mut dyn io::Read) -> BoxResult<usize> {
+        let lines = &mut io::BufReader::new(input).lines();
+        lazy_static! {
+            static ref RE: Regex = Regex::new("^((.+) )*(.*) \\(contains ((.+), )*(.*)\\)$").unwrap();
+        }
         let mut foods = lines.map(|l| {
             let l = l.unwrap();
             let cap = RE.captures(&l).unwrap();
@@ -34,11 +64,9 @@ impl Day21 {
             (ingredients, allergens)
         }).collect_vec();
         foods.sort_by_key(|(ingredients, _)| ingredients.len());
-        println!("{:?}", foods);
 
         let mut i = 0;
         let facts_base = foods.iter().fold(vec![HashMap::new()], |facts_base, (ingredients, allergens)| {
-            println!("{}", i); i += 1;
             let isp = ingredients.iter().permutations(allergens.len());
             let iasp = isp.map(|is|
                 is.iter().map(|s| s.to_string()).zip(allergens.iter().map(|s| s.to_string())).collect::<HashMap<_, _>>());
@@ -82,15 +110,46 @@ impl Day21 {
                 .filter(|&(new_facts, facts)| is_compatible(new_facts, facts))
                 .map(|(new_facts, facts)| merge(new_facts, facts)).collect_vec()
         });
-        println!("{:?}", facts_base);
         let harmless = facts_base[0].iter().filter(|(_, (allergen, _))| allergen.is_none()).map(|(id, _)| id).collect::<HashSet<_>>();
-        println!("{:?}", harmless);
         Ok(foods.iter().map(|(ingredients, _)| ingredients.iter().filter(|&ingredient| harmless.contains(ingredient)).count()).sum())
     }
 
-    fn part2_impl(self: &Self, input: &mut dyn io::Read) -> BoxResult<usize> {
+    fn part2_impl(self: &Self, input: &mut dyn io::Read) -> BoxResult<String> {
         let lines = &mut io::BufReader::new(input).lines();
-        Ok(0)
+        lazy_static! {
+            static ref RE: Regex = Regex::new("^((.+) )*(.*) \\(contains ((.+), )*(.*)\\)$").unwrap();
+        }
+        let foods = lines.map(|l| {
+            let l = l.unwrap();
+            let cap = RE.captures(&l).unwrap();
+            let ingredients = format!("{}{}", cap[1].to_string(), cap[3].to_string());
+            let ingredients = ingredients.split(" ").map(|s| s.to_string()).collect::<HashSet<_>>();
+            let allergens = format!("{}{}", cap.get(4).map_or("", |m| m.as_str()).to_string(), cap[6].to_string());
+            let allergens = allergens.split(", ").map(|s| s.to_string()).collect::<HashSet<_>>();
+            (ingredients, allergens)
+        }).collect_vec();
+        let all_ingredients = foods.iter().flat_map(|(ingredients, _)| ingredients).map(|s| s.to_string()).collect::<HashSet<_>>();
+        let all_allergens = foods.iter().flat_map(|(_, allergens)| allergens).map(|s| s.to_string()).collect::<HashSet<_>>();
+        let all_allergens = all_allergens.iter().map(|allergen| (allergen.to_string(), all_ingredients.clone())).collect::<HashMap<_, _>>();
+        let all_allergens = foods.iter().fold(all_allergens, |all_allergens, (ingredients, allergens)|
+            all_allergens.iter().map(|(allergen, possible_ingredients)|
+                (allergen.to_string(),
+                 if allergens.contains(allergen) {
+                     possible_ingredients.intersection(ingredients).map(|s| s.to_string()).collect::<HashSet<_>>()
+                 } else { possible_ingredients.clone() }))
+                .collect::<HashMap<_, _>>());
+        let mut dangerous: Vec<(String, String)> = vec![];
+        let mut allergens = all_allergens.clone();
+        while allergens.len() > 0 {
+            let (allergen, ingredients) = allergens.iter().find(|&(_, ingredients)| ingredients.len() == 1).unwrap();
+            let (allergen, ingredients) = (allergen.to_string(), ingredients.clone());;
+            allergens.remove(&allergen);
+            let ingredient = ingredients.iter().next().unwrap().to_string();
+            allergens.iter_mut().for_each(|(_, ingredients)| { ingredients.remove(&ingredient); });
+            dangerous.push((allergen.to_string(), ingredient));
+        }
+        dangerous.sort_by_key(|(allergen, _)| allergen.clone());
+        Ok(format!("{}", dangerous.iter().map(|(_, ingredient)| ingredient).join(",")))
     }
 }
 
@@ -110,12 +169,15 @@ sqjhc fvjkl (contains soy)
 sqjhc mxmxvkd sbzzf (contains fish)", 5);
     }
 
-    fn test2(s: &str, f: usize) {
-        assert_eq!(Day21 {}.part2_impl(&mut s.as_bytes()).ok(), Some(f));
+    fn test2(s: &str, f: &str) {
+        assert_eq!(Day21 {}.part2_impl(&mut s.as_bytes()).ok(), Some(f.to_string()));
     }
 
     #[test]
     fn part2() {
-        test2("", 12);
+        test2("mxmxvkd kfcds sqjhc nhms (contains dairy, fish)
+trh fvjkl sbzzf mxmxvkd (contains dairy)
+sqjhc fvjkl (contains soy)
+sqjhc mxmxvkd sbzzf (contains fish)", "mxmxvkd,sqjhc,fvjkl");
     }
 }
