@@ -1,5 +1,4 @@
 use crate::day::*;
-use std::time::{SystemTime, Duration};
 use std::ops::Add;
 use std::collections::HashMap;
 
@@ -108,7 +107,7 @@ impl/*<T>*/ ListTable/*<T>*/ {
         let cups = init.iter().map(|i| *i).chain(l as u32 + 1..n.unwrap_or(l) as u32 + 1)/*.map(|&c| c).collect::<VecDeque<_>>()*/.collect::<dlv_list::VecList<_>>();
         let (min, max, p, rev) =
             (1, n.unwrap_or(l) as u32, cups.indices().next().unwrap(), cups.indices().map(|i| (*cups.get(i).unwrap(), i)).collect::<HashMap<_, _>>());
-        Self { cups, min, max, p, rev, d: Duration::new(0, 0) }
+        Self { cups, min, max, p, rev }
     }
 }
 
