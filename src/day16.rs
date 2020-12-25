@@ -1,7 +1,6 @@
 use crate::day::*;
 use itertools::Itertools;
 use std::collections::HashSet;
-use std::borrow::BorrowMut;
 
 pub struct Day16 {}
 
@@ -63,14 +62,13 @@ impl Day16 {
         let tickets = lines.filter(|r| !(*r).as_ref().unwrap().contains(":"))
             .map(|r| r.unwrap().split(",").map(|n| n.parse::<usize>().unwrap()).collect_vec()).collect_vec();
         let valid = tickets.iter().filter(|&t| t.iter().all(|&n| valid(n))).map(|r| r).collect_vec();
-        let f= 0;
         let poss = &mut (0..fields.len()).map(|_| fields.iter().collect::<HashSet<_>>()).collect_vec();
         for &t in valid.iter() {
             t.iter().zip(poss.iter_mut()).for_each(|(v, fset)| fset.retain(|(_, r1, r2)| r1.contains(v) || r2.contains(v)));
         }
         let mut x = poss.iter_mut().enumerate().collect_vec();
         // XXX Manually checked that my input has exactly one column that fits for each iteration
-        x.sort_by_key(|(i, p)| p.len());
+        x.sort_by_key(|(_, p)| p.len());
         let mut s = HashSet::new();
         let mut pr = HashSet::new();
         for i in 0..x.len() {

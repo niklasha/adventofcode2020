@@ -1,7 +1,6 @@
 use regex::Regex;
 use std::collections::HashMap;
 use crate::day::*;
-use regex::internal::Input;
 
 pub struct Day14 {}
 

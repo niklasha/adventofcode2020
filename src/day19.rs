@@ -1,5 +1,4 @@
 use crate::day::*;
-use std::collections::VecDeque;
 
 pub struct Day19 {}
 
