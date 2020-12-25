@@ -142,7 +142,7 @@ impl Day21 {
         let mut allergens = all_allergens.clone();
         while allergens.len() > 0 {
             let (allergen, ingredients) = allergens.iter().find(|&(_, ingredients)| ingredients.len() == 1).unwrap();
-            let (allergen, ingredients) = (allergen.to_string(), ingredients.clone());;
+            let (allergen, ingredients) = (allergen.to_string(), ingredients.clone());
             allergens.remove(&allergen);
             let ingredient = ingredients.iter().next().unwrap().to_string();
             allergens.iter_mut().for_each(|(_, ingredients)| { ingredients.remove(&ingredient); });
