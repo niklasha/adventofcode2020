@@ -11,7 +11,7 @@ impl Day for Day20 {
     }
 
     fn part2(&self, input: &dyn Fn() -> Box<dyn io::Read>) {
-        println!("{:?}", self.part2_impl(&mut *input(), 12, 0));
+        println!("{:?}", self.part2_impl(&mut *input(), 12, 2539));
     }
 }
 
@@ -65,7 +65,7 @@ impl Day20 {
 
     fn rot(tile: &Vec<String>) -> Vec<String> {
         let sz = tile.len();
-        (0..sz).map(|y| (0..sz).map(move |x| tile[x].chars().collect_vec()[y]).collect::<String>()).collect()
+        (0..sz).map(|y| (0..sz).map(move |x| tile[x].chars().collect_vec()[sz - y - 1]).collect::<String>()).collect()
     }
 
     fn flip(tile: &Vec<String>) -> Vec<String> {
@@ -74,17 +74,17 @@ impl Day20 {
     }
 
     fn configs(tile: &Vec<String>) -> HashSet<(Vec<String>, Vec<String>)> {
-        let mut tile = tile.clone();
+        let tile = tile.clone();
         let mut configs = HashSet::new();
         configs.insert(tile.clone());
         configs.insert(Self::flip(&tile));
-        tile = Self::rot(&tile);
+        let tile = Self::rot(&tile);
         configs.insert(tile.clone());
         configs.insert(Self::flip(&tile));
-        tile = Self::rot(&tile);
+        let tile = Self::rot(&tile);
         configs.insert(tile.clone());
         configs.insert(Self::flip(&tile));
-        tile = Self::rot(&tile);
+        let tile = Self::rot(&tile);
         configs.insert(tile.clone());
         configs.insert(Self::flip(&tile));
         configs.iter().map(|c| {
@@ -94,11 +94,21 @@ impl Day20 {
     }
 
     fn north(tile: &Vec<String>) -> String { tile[0].to_string() }
-    fn south(tile: &Vec<String>) -> String { tile.iter().last().unwrap().to_string() }
+    fn south(tile: &Vec<String>) -> String { tile.last().unwrap().to_string() }
     fn west(tile: &Vec<String>) -> String { tile.iter().map(|r| r.chars().next().unwrap()).collect::<String>() }
     fn east(tile: &Vec<String>) -> String { tile.iter().map(|r| r.chars().last().unwrap()).collect::<String>() }
 
-    fn edges(tile: &Vec<String>) -> Vec<String> { vec![ Self::north(tile), Self::west(tile), Self::south(tile), Self::east(tile) ] }
+    const NORTH: usize = 0;
+    const WEST: usize = 1;
+
+    fn edges(tile: &Vec<String>) -> Vec<String> { vec![Self::north(tile), Self::west(tile), Self::south(tile), Self::east(tile)] }
+
+    #[allow(dead_code)]
+    fn print(tile: &Vec<String>) {
+        for row in tile {
+            println!("{}", row);
+        }
+    }
 
     fn part2_impl(self: &Self, input: &mut dyn io::Read, n: usize, start: usize) -> BoxResult<usize> {
         let lines = &mut io::BufReader::new(input).lines();
@@ -128,94 +138,67 @@ impl Day20 {
             }
             tiles.insert(id, configs);
         }
-//        println!("{:?}", tiles);
-//        println!("{:?}", edges);
-        let (NORTH, WEST, SOUTH, EAST) = (0, 1, 2, 3);
-        let unused = tiles.iter().map(|(&id, _)| id).collect::<HashSet<_>>();
-        for config_0 in tiles.get(&start).unwrap().iter().map(|(x, _)| (start, x)) {
-            let e0 = Self::east(config_0.1);
-            let s0 = Self::south(config_0.1);
-            println!("0 {:?} e {} s {}", config_0, e0, s0);
-            if let Some(e_configs) = edges.get(&(e0, WEST)) {
-                for config_1 in e_configs {
-                    let e1 = Self::east(&config_1.1);
-                    let s1 = Self::south(&config_1.1);
-                    println!("1 {:?} e {} s {}", config_1.0, e1, s1);
-                    if let Some(e_configs) = edges.get(&(e1, WEST)) {
-                        for config_2 in e_configs {
-                            let s2 = Self::south(&config_2.1);
-                            println!("2 {:?} s {}", config_2.0, s2);
-                            if let Some(s_configs) = edges.get(&(s0.clone(), NORTH)) {
-                                for config_3 in s_configs {
-                                    let e3 = Self::east(&config_3.1);
-                                    let s3 = Self::south(&config_3.1);
-                                    println!("3 {:?} e {} s {}", config_3.0, e3, s3);
-                                    if let Some(e_configs) = edges.get(&(e3, WEST)) {
-                                        if let Some(s_configs) = edges.get(&(s1.clone(), NORTH)) {
-                                            println!("s_configs {:?}", s_configs);
-                                            for config_4 in e_configs.intersection(s_configs) {
-                                                let e4 = Self::east(&config_4.1);
-                                                let s4 = Self::south(&config_4.1);
-                                                println!("4 {:?} e {} s {}", config_4.0, e4, s4);
-                                                if let Some(e_configs) = edges.get(&(e4, WEST)) {
-                                                    if let Some(s_configs) = edges.get(&(s2.clone(), NORTH)) {
-                                                        println!("s_configs {:?}", s_configs);
-                                                        for config_5 in e_configs.intersection(s_configs) {
-                                                            let s5 = Self::south(&config_5.1);
-                                                            println!("5 {:?} s {}", config_5.0, s5);
-                                                            if let Some(s_configs) = edges.get(&(s3.clone(), NORTH)) {
-                                                                for config_6 in s_configs {
-                                                                    let e6 = Self::east(&config_6.1);
-                                                                    println!("6 {:?} e {}", config_6.0, e6);
-                                                                    if let Some(e_configs) = edges.get(&(e6, WEST)) {
-                                                                        if let Some(s_configs) = edges.get(&(s4.clone(), NORTH)) {
-                                                                            println!("s_configs {:?}", s_configs);
-                                                                            for config_7 in e_configs.intersection(s_configs) {
-                                                                                let e7 = Self::east(&config_7.1);
-                                                                                println!("7 {:?} e {}", config_7.0, e7);
-                                                                                if let Some(e_configs) = edges.get(&(e7, WEST)) {
-                                                                                    if let Some(s_configs) = edges.get(&(s5.clone(), NORTH)) {
-                                                                                        println!("s_configs {:?}", s_configs);
-                                                                                        for config_8 in e_configs.intersection(s_configs) {
-                                                                                            println!("LAST {:?} {:?} {:?} {:?} {:?} {:?} {:?} {:?} {:?}", config_0.0, config_1.0, config_2.0, config_3.0, config_4.0, config_5.0, config_6.0, config_7.0, config_8.0);
-                                                                                        }
-                                                                                    }
-                                                                                }
-                                                                            }
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+
+        fn puzzle(path: Vec<(usize, Vec<String>)>,
+                  tiles: HashMap<usize, HashSet<(Vec<String>, Vec<String>)>>,
+                  n: usize,
+                  edges: &HashMap<(String, usize), HashSet<(usize, Vec<String>)>>
+        ) -> Option<Vec<(usize, Vec<String>)>> {
+            if tiles.is_empty() { Some(path) }
+            else {
+                let i = path.len();
+                let (r, c) = (i / n, i % n);
+                let eastern = if c > 0 { edges.get(&(Day20::east(&path.last().unwrap().1), Day20::WEST)) } else { None };
+                let southern = if r > 0 { edges.get(&(Day20::south(&path.get(i - n).unwrap().1), Day20::NORTH)) } else { None };
+                let x = eastern.map_or(southern.clone().unwrap_or(&HashSet::new()).clone(),
+                                       |e| southern.map_or(eastern.unwrap().clone(),
+                                                           |s| e.iter().cloned().filter(|t| s.contains(t)).collect::<HashSet<_>>()));
+                let x = x.iter().filter(|&(id, _)| !path.iter().any(|(path_id, _)| path_id == id)).cloned().collect_vec();
+                x.iter().map(|candidate| {
+                    let mut path = path.clone();
+                    let mut t = tiles.clone();
+                    t.remove(&candidate.0);
+                    path.push(candidate.clone());
+                    puzzle(path, t, n, edges)
+                }).flatten().next()
             }
         }
 
-        let perms = tiles.iter().permutations(n * n).map(|perm| {
-            perm.iter().map(|&(_, tile)| tile).collect_vec()
-        });
-        let perms = perms.filter(|perm|
-            (0..(n * n) - 1).all(|i| {
-                let h = (i + 1) % n == n - 1 ||
-                    perm[i + 1].iter().any(|(_, b_edges)| perm[i].iter().any(|(_, a_edges)| a_edges.iter().any(|edge| b_edges.contains(edge))));
-                let v = i + n >= (n * (n - 1)) ||
-                    perm[i + n].iter().any(|(_, c_edges)| perm[i].iter().any(|(_, a_edges)| a_edges.iter().any(|edge| c_edges.contains(edge))));
-                h && v
-            }));
-        //let x = perms.next().unwrap();
-//        let x = perms.count();
-        let x = perms.take(1).collect_vec();
-        println!("{:?}", x);
-        Ok(0)
+        let mut t = tiles.clone();
+        let map = t.remove(&start).unwrap().iter()
+            .map(|config| puzzle(vec![(start, config.0.clone())], t.clone(), n, &edges))
+            .flatten().next().unwrap();
+        let map = map.chunks(n).map(|r| r.iter().map(|(_, t)| t.clone()).collect_vec()).collect_vec();
+        let map = map.iter().flat_map(|rt|
+            (1..rt[0].len() - 1).map(|i| rt.iter().map(|rs| (&rs[i][1..rs.len() - 1]).clone()).collect_vec().join("")).collect_vec()).collect_vec();
+        let monster = vec![
+            "                  # ".to_string(),
+            "#    ##    ##    ###".to_string(),
+            " #  #  #  #  #  #   ".to_string()
+        ];
+        let monster_sz = count_hashes(&monster);
+
+        fn count_hashes(img: &Vec<String>) -> usize { img.iter().map(|s| s.chars().filter(|&c| c == '#').count()).sum() }
+
+        fn matches(map: &Vec<String>, x: usize, y: usize, img: &Vec<String>) -> bool {
+            let mut result = true;
+            for dy in 0..img.len() {
+                for dx in 0..img[0].len() {
+                    if img[dy].chars().nth(dx).unwrap() == '#' && map[y + dy].chars().nth(x + dx).unwrap() != '#' { result = false }
+                }
+            }
+            result
+        }
+
+        fn count(map: &Vec<String>, img: &Vec<String>) -> usize {
+            (0..map.len() - img.len() + 1).map(|y|
+                (0..map[0].len() - img[0].len() + 1).map(|x|
+                    if matches(map, x, y, img) { println!("{} {}", x, y); 1usize } else { 0 }).sum::<usize>()).sum()
+        }
+
+        let maps = Self::configs(&map).iter().map(|(c, _)| c.clone()).collect_vec();
+        let monster_count: usize = maps.iter().map(|map| count(map, &monster)).sum();
+        Ok(count_hashes(&map) - monster_count * monster_sz)
     }
 }
 
