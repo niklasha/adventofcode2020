@@ -65,7 +65,6 @@ impl Day21 {
         }).collect_vec();
         foods.sort_by_key(|(ingredients, _)| ingredients.len());
 
-        let mut i = 0;
         let facts_base = foods.iter().fold(vec![HashMap::new()], |facts_base, (ingredients, allergens)| {
             let isp = ingredients.iter().permutations(allergens.len());
             let iasp = isp.map(|is|
