@@ -193,7 +193,7 @@ impl Day20 {
         fn count(map: &Vec<String>, img: &Vec<String>) -> usize {
             (0..map.len() - img.len() + 1).map(|y|
                 (0..map[0].len() - img[0].len() + 1).map(|x|
-                    if matches(map, x, y, img) { println!("{} {}", x, y); 1usize } else { 0 }).sum::<usize>()).sum()
+                    if matches(map, x, y, img) { 1usize } else { 0 }).sum::<usize>()).sum()
         }
 
         let maps = Self::configs(&map).iter().map(|(c, _)| c.clone()).collect_vec();
